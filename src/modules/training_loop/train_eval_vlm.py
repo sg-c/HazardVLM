@@ -55,6 +55,7 @@ def train_model(config, model, train_data_loader, val_data_loader, optimizer, lr
         all_masks_flat = torch.zeros(pseudo_batch * max_tok_per_caption, dtype=torch.bool).to(device)
         count = 0
 
+        pseudo_batch_count = 0
         for idx, (videos, masks, captions) in enumerate(train_data_loader):
             optimizer.zero_grad()  # Clear gradients for the next train step
 
@@ -91,7 +92,7 @@ def train_model(config, model, train_data_loader, val_data_loader, optimizer, lr
                 # Mask out padding tokens
                 all_logits_flat = all_logits_flat[all_masks_flat]
                 all_targets_flat = all_targets_flat[all_masks_flat]
-                
+
                 # Compute the loss over the accumulated samples
                 loss = loss_func(all_logits_flat, all_targets_flat) # Compute the loss, only considering non-padding tokens
                 total_loss += loss.item()
@@ -107,7 +108,17 @@ def train_model(config, model, train_data_loader, val_data_loader, optimizer, lr
                     loss.backward() # Perform backpropagation
                     # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)  # Clip gradients to avoid exploding gradients
                     optimizer.step() # Update weights
-                
+
+                # Log to wandb every pseudo-batch for live monitoring
+                pseudo_batch_count += 1
+                wandb.log({
+                    'Batch Loss': loss.item(),
+                    'Batch': idx + 1,
+                    'Pseudo Batch': pseudo_batch_count,
+                    'Epoch': epoch + 1,
+                    'Learning Rate': get_lr(optimizer),
+                })
+
                 # Clear the accumulators
                 all_logits_flat = torch.zeros(pseudo_batch * max_tok_per_caption, tokenizer_vocab_size, dtype=torch.float32).to(device)
                 all_targets_flat = torch.zeros(pseudo_batch * max_tok_per_caption, dtype=torch.int64).to(device)
