@@ -174,7 +174,7 @@ def model_init(model_config=None): # none by default if left empty
         else:
             scaler = None
 
-        lr_scheduler = ReduceLROnPlateau(optimizer, mode='min',factor=model_config['step_lr_multiplier'], patience=model_config['plateau_lr_patience'],verbose=1) #factor=0.5, patience=5,verbose=1
+        lr_scheduler = ReduceLROnPlateau(optimizer, mode='min',factor=model_config['step_lr_multiplier'], patience=model_config['plateau_lr_patience']) #factor=0.5, patience=5
         os.makedirs('./models', exist_ok=True)
 
         if INIT_CONFIG['proc_mode'] == 1:

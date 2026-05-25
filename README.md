@@ -30,13 +30,19 @@ Using Eigen-CAM heatmaps, we can visualise the most activated regions and import
 Conda Environment Setup   
 
 ```         
-conda create -n HazardVLM python=3.9.13
+conda create -n HazardVLM python=3.9.13 -y
 conda activate HazardVLM       
-conda install pip
-conda install pytorch=2.1.0 torchvision=0.16.0 torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
-conda install -c conda-forge scikit-learn=1.3.2 
-pip install -r requirements.txt
+conda install uv -y
+conda install pytorch=2.1.0 torchvision=0.16.0 torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia -y
+conda install -c conda-forge scikit-learn=1.3.2 matplotlib gdown -y
 
+# fix `cuda not available` issue
+conda install --force-reinstall torch torchvision --index-url https://download.pytorch.org/whl/cu118
+uv pip install "numpy<2.0"
+
+git clone https://github.com/dannierxiao/HazardVLM.git
+cd HazardVLM
+uv pip install -r requirements.txt
 ```
 
 
@@ -63,6 +69,13 @@ Place them in `src/models` directory.
 ### 3. Dataset
 We release our the datasets for download at:
 [https://drive.google.com/drive/folders/1ypCRsIH9prbcRH8CBhGi4hhVE5dQNWV4?usp=drive_link]
+
+```bash
+# Download to ~/HazardVLM/Dataset/dataset.zip
+gdown --folder 1ypCRsIH9prbcRH8CBhGi4hhVE5dQNWV4
+
+unzip /workspace/HazardVLM/HazardVLM/Dataset/dataset.zip -d src/
+```
 
 Create a `src/datasets` directory and place datasets in there.
 
