@@ -40,6 +40,9 @@ conda install -c conda-forge scikit-learn=1.3.2 matplotlib gdown -y
 conda install --force-reinstall torch torchvision --index-url https://download.pytorch.org/whl/cu118
 uv pip install "numpy<2.0"
 
+# solve wandb login issue
+uv pip install --upgrade wandb
+
 git clone https://github.com/dannierxiao/HazardVLM.git
 cd HazardVLM
 uv pip install -r requirements.txt
