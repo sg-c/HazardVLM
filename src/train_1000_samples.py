@@ -66,9 +66,15 @@ print(f"[train_1000_samples] Full dataset: {total} -> Subset: 1000")
 # ---------------------------------------------------------------------------
 shutil.copy(CONFIG_PATH, CONFIG_BACKUP_PATH)
 
-model_config["input_filename"] = subset_filename
+with open(CONFIG_PATH, encoding="utf-8") as f:
+    lines = f.readlines()
+
 with open(CONFIG_PATH, "w", encoding="utf-8") as f:
-    yaml.dump(model_config, f, default_flow_style=False)
+    for line in lines:
+        if line.strip().startswith("input_filename:"):
+            f.write(f"input_filename: '{subset_filename}'\n")
+        else:
+            f.write(line)
 
 print(f"[train_1000_samples] Temporarily updated {CONFIG_PATH}")
 
