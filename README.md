@@ -34,7 +34,7 @@ conda create -n HazardVLM python=3.9.13 -y
 conda activate HazardVLM       
 conda install uv -y
 conda install -c conda-forge scikit-learn=1.3.2 matplotlib gdown -y
-uv pip install numpy<2.0 torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cu118
+uv pip install "numpy<2.0" torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cu118
 
 # solve wandb login issue
 uv pip install --upgrade wandb
