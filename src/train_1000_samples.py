@@ -1,0 +1,92 @@
+"""
+One-time script to train HazardVLM on a random subset of 1000 samples.
+
+Run from the src/ directory:
+    python train_1000_samples.py
+
+What it does:
+1. Loads the full dataset JSON specified in config/model_config_vlm.yaml
+2. Randomly samples 1000 entries (seed=42 for reproducibility)
+3. Writes the subset to a temporary JSON file
+4. Temporarily updates the config to point at the subset
+5. Runs the standard training pipeline (main.py)
+6. Restores the original config and cleans up temp files
+"""
+
+import json
+import os
+import random
+import shutil
+import subprocess
+import sys
+
+import yaml
+
+
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+# ---------------------------------------------------------------------------
+# 1. Load original config to find the dataset filename
+# ---------------------------------------------------------------------------
+CONFIG_PATH = "config/model_config_vlm.yaml"
+CONFIG_BACKUP_PATH = "config/model_config_vlm.yaml.bak"
+
+with open(CONFIG_PATH, encoding="utf-8") as f:
+    model_config = yaml.load(f, Loader=yaml.FullLoader)
+
+orig_filename = model_config["input_filename"]
+orig_json_path = f"datasets/{orig_filename}.json"
+
+# ---------------------------------------------------------------------------
+# 2. Build 1000-sample subset
+# ---------------------------------------------------------------------------
+with open(orig_json_path, encoding="utf-8") as f:
+    full_data = json.load(f)
+
+total = len(full_data)
+if total < 1000:
+    raise ValueError(
+        f"Dataset only has {total} samples; cannot extract 1000."
+    )
+
+random.seed(42)
+subset = random.sample(full_data, 1000)
+
+subset_filename = f"{orig_filename}_1000"
+subset_json_path = f"datasets/{subset_filename}.json"
+
+with open(subset_json_path, "w", encoding="utf-8") as f:
+    json.dump(subset, f)
+
+print(f"[train_1000_samples] Created subset: {subset_json_path}")
+print(f"[train_1000_samples] Full dataset: {total} -> Subset: 1000")
+
+# ---------------------------------------------------------------------------
+# 3. Temporarily swap config to point at subset
+# ---------------------------------------------------------------------------
+shutil.copy(CONFIG_PATH, CONFIG_BACKUP_PATH)
+
+model_config["input_filename"] = subset_filename
+with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+    yaml.dump(model_config, f, default_flow_style=False)
+
+print(f"[train_1000_samples] Temporarily updated {CONFIG_PATH}")
+
+# ---------------------------------------------------------------------------
+# 4. Run standard training pipeline
+# ---------------------------------------------------------------------------
+try:
+    print("[train_1000_samples] Launching main.py ...\n")
+    result = subprocess.run(
+        [sys.executable, "main.py"],
+        check=False,
+    )
+    sys.exit(result.returncode)
+finally:
+    # -----------------------------------------------------------------------
+    # 5. Restore original config and remove temp files
+    # -----------------------------------------------------------------------
+    shutil.move(CONFIG_BACKUP_PATH, CONFIG_PATH)
+    os.remove(subset_json_path)
+    print(f"\n[train_1000_samples] Restored {CONFIG_PATH}")
+    print(f"[train_1000_samples] Removed temp dataset: {subset_json_path}")
