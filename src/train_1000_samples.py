@@ -16,8 +16,8 @@ What it does:
 import json
 import os
 import random
+import runpy
 import shutil
-import subprocess
 import sys
 
 import yaml
@@ -84,15 +84,11 @@ with open(CONFIG_PATH, encoding="utf-8") as f:
 print(f"[train_1000_samples] Verifying config input_filename: {verify_config['input_filename']}")
 
 # ---------------------------------------------------------------------------
-# 4. Run standard training pipeline
+# 4. Run standard training pipeline in-process (avoids uv-run fs isolation)
 # ---------------------------------------------------------------------------
 try:
-    print("[train_1000_samples] Launching main.py ...\n")
-    result = subprocess.run(
-        [sys.executable, "main.py"],
-        check=False,
-    )
-    sys.exit(result.returncode)
+    print("[train_1000_samples] Launching main.py in-process ...\n")
+    runpy.run_path("main.py", run_name="__main__")
 finally:
     # -----------------------------------------------------------------------
     # 5. Restore original config and remove temp files
