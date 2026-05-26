@@ -78,6 +78,11 @@ with open(CONFIG_PATH, "w", encoding="utf-8") as f:
 
 print(f"[train_1000_samples] Temporarily updated {CONFIG_PATH}")
 
+# Verify the config file was actually modified
+with open(CONFIG_PATH, encoding="utf-8") as f:
+    verify_config = yaml.load(f, Loader=yaml.FullLoader)
+print(f"[train_1000_samples] Verifying config input_filename: {verify_config['input_filename']}")
+
 # ---------------------------------------------------------------------------
 # 4. Run standard training pipeline
 # ---------------------------------------------------------------------------
