@@ -33,16 +33,12 @@ Conda Environment Setup
 conda create -n HazardVLM python=3.9.13 -y
 conda activate HazardVLM       
 conda install uv -y
-conda install pytorch=2.1.0 torchvision=0.16.0 torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia -y
 conda install -c conda-forge scikit-learn=1.3.2 matplotlib gdown -y
-
-# fix `cuda not available` issue
-uv pip uninstall torchvision torchaudio
-uv pip install torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cu12
-uv pip install "numpy<2.0"
+uv pip install numpy<2.0 torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cu118
 
 # solve wandb login issue
 uv pip install --upgrade wandb
+wandb login
 
 git clone https://github.com/sg-c/HazardVLM.git
 cd HazardVLM
